@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         // searchEdit와 searchButton
         val searchButton = binding.searchButton
         val searchEdit = binding.searchEditText
-        val dateButton = binding.dateButton
+        val dateButton = binding.titleCountButton
         val upperButton = binding.theUppperFloatingButton
 
         // Recyclerview에 Adapter 및 GridLayoutManager 설정
@@ -168,11 +168,11 @@ class MainActivity : AppCompatActivity() {
     interface YouTubeApiService {
         @GET("youtube/v3/search")
         fun searchVideos(
-            @Query("part") part: String,
-            @Query("maxResults") maxResults: Int,
-            @Query("order") order: String,
-            @Query("q") query: String,
-            @Query("key") apiKey: String
+            @Query("part") part: String, // API 응답에서 반환되어야 하는 데이터 부분
+            @Query("maxResults") maxResults: Int, // 반환되는 최대 갯수
+            @Query("order") order: String, // 검색 결과 정렬 순
+            @Query("q") query: String, // youtube에서 검색하고자 하는 문자열
+            @Query("key") apiKey: String // api key
         ): Call<YouTubeSearchResponse>
     }
 

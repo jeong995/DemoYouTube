@@ -18,11 +18,11 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/dateButton"
+        android:id="@+id/titleCountButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
-        android:text="date"
+        android:text="Count"
         app:layout_constraintEnd_toStartOf="@+id/searchButton"
         app:layout_constraintTop_toTopOf="@id/searchButton"
         app:layout_constraintBottom_toBottomOf="@id/searchButton"
