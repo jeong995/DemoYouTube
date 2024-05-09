@@ -12,6 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="44dp"
         android:layout_margin="5dp"
+        android:hint="검색어를 입력해주세여"
         app:layout_constraintEnd_toStartOf="@+id/dateButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -24,7 +25,8 @@
         android:text="date"
         app:layout_constraintEnd_toStartOf="@+id/searchButton"
         app:layout_constraintTop_toTopOf="@id/searchButton"
-        app:layout_constraintBottom_toBottomOf="@id/searchButton"/>
+        app:layout_constraintBottom_toBottomOf="@id/searchButton"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/searchButton"
@@ -43,5 +45,15 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/searchEditText"
         android:layout_margin="5dp"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/theUppperFloatingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="30dp"
+        android:visibility="gone"
+        android:src="@drawable/baseline_arrow_circle_up_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

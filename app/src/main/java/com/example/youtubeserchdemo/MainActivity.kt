@@ -25,7 +25,7 @@ import retrofit2.http.Query
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-
+    private val items: MutableList<Item> by lazy { mutableListOf<Item>() }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -42,50 +42,7 @@ class MainActivity : AppCompatActivity() {
         val searchButton = binding.searchButton
         val searchEdit = binding.searchEditText
         val dateButton = binding.dateButton
-
-        val items = mutableListOf<Item>()
-
-        // dateButton을 눌렀을 때의 동작, 조회 수
-        dateButton.setOnClickListener {
-            val searchQuery = searchEdit.text.toString()
-            if (searchQuery.isEmpty()) {
-                Toast.makeText(this, "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show()
-            } else {
-                val retrofit = Retrofit.Builder()
-                    .baseUrl("https://www.googleapis.com/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build()
-
-                val youTubeApiService = retrofit.create(YouTubeApiService::class.java)
-                youTubeApiService.searchVideos(
-                    "snippet",
-                    50,
-                    "viewCount",
-                    searchQuery,
-                    "AIzaSyBJChZvHdl4oa6_F0KzJ6Wya2BP2pzLX-8"
-                ).enqueue(object : Callback<YouTubeSearchResponse> {
-                    override fun onResponse(
-                        call: Call<YouTubeSearchResponse>,
-                        response: Response<YouTubeSearchResponse>
-                    ) {
-                        if (response.isSuccessful) {
-                            val searchItems = response.body()?.items?.map { item ->
-                                Item(item.id, item.snippet)
-                            } ?: listOf()
-
-                            items.clear()
-                            items.addAll(searchItems)
-                            binding.itemRecyclerView.adapter?.notifyDataSetChanged()
-                        }
-                    }
-
-                    override fun onFailure(call: Call<YouTubeSearchResponse>, t: Throwable) {
-                        // 실패 처리
-                        Toast.makeText(this@MainActivity, "데이터를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                    }
-                })
-            }
-        }
+        val upperButton = binding.theUppperFloatingButton
 
         // Recyclerview에 Adapter 및 GridLayoutManager 설정
         binding.itemRecyclerView.adapter = MyAdapter(items)
@@ -120,19 +77,91 @@ class MainActivity : AppCompatActivity() {
                                 Item(item.id, item.snippet)
                             } ?: listOf()
 
+                            // 나중에 함수로 분리해야 됨 업데이트 된다는 내용
                             items.clear()
                             items.addAll(searchItems)
                             binding.itemRecyclerView.adapter?.notifyDataSetChanged()
+
+                            dateButton.visibility = View.VISIBLE
+                            // dateButton을 눌렀을 때의 동작, 조회 수
+                            dateButton.setOnClickListener {
+                                val retrofit = Retrofit.Builder()
+                                    .baseUrl("https://www.googleapis.com/")
+                                    .addConverterFactory(GsonConverterFactory.create())
+                                    .build()
+
+                                val youTubeApiService =
+                                    retrofit.create(YouTubeApiService::class.java)
+                                youTubeApiService.searchVideos(
+                                    "snippet",
+                                    50,
+                                    "viewCount", // 조회수 순으로 변경
+                                    searchQuery, // 이전에 사용자가 입력한 검색어 사용
+                                    "AIzaSyBJChZvHdl4oa6_F0KzJ6Wya2BP2pzLX-8"
+                                ).enqueue(object : Callback<YouTubeSearchResponse> {
+                                    override fun onResponse(
+                                        call: Call<YouTubeSearchResponse>,
+                                        response: Response<YouTubeSearchResponse>
+                                    ) {
+                                        if (response.isSuccessful) {
+                                            val searchItems = response.body()?.items?.map { item ->
+                                                Item(item.id, item.snippet)
+                                            } ?: listOf()
+
+                                            items.clear()
+                                            items.addAll(searchItems)
+                                            binding.itemRecyclerView.adapter?.notifyDataSetChanged()
+                                        }
+                                    }
+
+                                    override fun onFailure(
+                                        call: Call<YouTubeSearchResponse>,
+                                        t: Throwable
+                                    ) {
+                                        // 실패 처리
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "데이터를 불러오는 데 실패했습니다.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                })
+                            }
                         }
                     }
 
                     override fun onFailure(call: Call<YouTubeSearchResponse>, t: Throwable) {
                         // 실패 처리
-                        Toast.makeText(this@MainActivity, "데이터를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@MainActivity,
+                            "데이터를 불러오는 데 실패했습니다.",
+                            Toast.LENGTH_SHORT
+                        )
+                            .show()
                     }
                 })
             }
         }
+        // 최상단으로 이동
+        binding.itemRecyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener(){
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                // 스크롤이 멈췄을 때의 로직
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    // 최상단인지 확인
+                    val isAtTop = !recyclerView.canScrollVertically(-1)
+                    // 버튼 클릭시 최상단으로 이동
+                    upperButton.setOnClickListener {
+                        binding.itemRecyclerView.smoothScrollToPosition(0)
+                    }
+                    // 최상단이면 버튼 숨기기, 아니면 보이기
+                    if (isAtTop) {
+                        upperButton.visibility = View.GONE
+                    } else {
+                        upperButton.visibility = View.VISIBLE
+                    }
+                }
+            }
+        })
     }
 
     // youtube 설정을 위한 최소한의 interface
@@ -182,7 +211,8 @@ class MainActivity : AppCompatActivity() {
     )
 
     // recyclerview
-    class MyAdapter(private val items: List<Item>) : RecyclerView.Adapter<MyAdapter.ViewHolder>() {
+    class MyAdapter(private val items: List<Item>) :
+        RecyclerView.Adapter<MyAdapter.ViewHolder>() {
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             var ImageThumbnail: ImageView = view.findViewById(R.id.image_thumbnail)
