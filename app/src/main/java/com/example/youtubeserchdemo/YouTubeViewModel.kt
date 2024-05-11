@@ -38,7 +38,7 @@ class YouTubeViewModel() : ViewModel() {
             "snippet",
             "date", // 날짜순으로 입력
             searchQuery,
-            "AIzaSyDihls8KC2S1tjrVkrRccPwouGol3o3FfY",
+            "",
             "video",
             nextPageToken
 
